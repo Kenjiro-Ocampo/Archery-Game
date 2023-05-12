@@ -1,9 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using Cinemachine;
 public class S_CharacterMovement : MonoBehaviour
 {
+    [SerializeField] public Cinemachine.CinemachineFreeLook CharacterCamera; 
     [SerializeField] public CharacterController CharacterControl;
     [SerializeField] public Transform CameraMain;
     [SerializeField] public float speed = 16f;
@@ -19,6 +20,13 @@ public class S_CharacterMovement : MonoBehaviour
     private float SmoothTurnVector;
     private Vector3 Velocity;
     private float PrivateSpeed;
+    [SerializeField] public float MinZoom = 50f;
+    [SerializeField] public float MaxZoom = 70f;
+    private bool ZoomState = false;
+    private float ZoomInterpolate = 0.0f;
+    Vector3 AimTarget;
+    Vector3 AimDirection;
+
 
     void Start()
     {
@@ -32,23 +40,43 @@ public class S_CharacterMovement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        float Horizontal = Input.GetAxisRaw("Horizontal");
-        float Vertical = Input.GetAxisRaw("Vertical");
-        Vector3 CamForwardVec = new Vector3(Horizontal, 0f, Vertical).normalized;
+        // Check is grounded
+        bGrounded = (Physics.CheckSphere(GroundCheck.position, GroundDistance, GroundMask));
 
-
-        if (CamForwardVec.magnitude >= 0.1f)
+        if(bGrounded && Velocity.y < 0)
         {
-            float NewAngle = Mathf.Atan2(CamForwardVec.x, CamForwardVec.z) * Mathf.Rad2Deg + CameraMain.eulerAngles.y;
-            float CurAngle = Mathf.SmoothDampAngle(transform.eulerAngles.y, NewAngle, ref SmoothTurnVector, TurnSmoothing);
-            transform.rotation = Quaternion.Euler(0f, NewAngle, 0f);
+            Velocity.y = -2f;
+        }
+        
+        // Mouse Input
+        float horizontal = Input.GetAxisRaw("Horizontal");
+        float vertical = Input.GetAxisRaw("Vertical");
+        Vector3 direction = new Vector3(horizontal, 0f, vertical).normalized;
 
-            Vector3 MoveDirVector = Quaternion.Euler(0f, NewAngle, 0f) * Vector3.forward;
-            CharacterControl.Move(MoveDirVector.normalized * this.speed * Time.deltaTime);
+        Velocity.y += Gravity * Time.deltaTime;
+
+        CharacterControl.Move(Velocity * Time.deltaTime);
+
+        if(Input.GetButtonDown("Jump") && bGrounded)
+        {
+            Velocity.y = Mathf.Sqrt(MaxJumpHeight * -2f * Gravity);
         }
 
+        if (direction.magnitude >= 0.1f)
+        {
+            float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg + CameraMain.eulerAngles.y;
+            float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref SmoothTurnVector, TurnSmoothing);
+            transform.rotation = Quaternion.Euler(0f, targetAngle, 0f);
+
+
+
+            Vector3 moveDir = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
+            CharacterControl.Move(moveDir.normalized * speed * Time.deltaTime);
+        }
+
+
+        CharacterZoom();
         CharacterSprintMovement();
-        GravityAndJumpCalc();
     }
 
     private void GravityAndJumpCalc()
@@ -77,6 +105,33 @@ public class S_CharacterMovement : MonoBehaviour
         else
         {
             this.speed = PrivateSpeed;
+        }
+    }
+
+    //Not Working Lerp Fix Later
+    private void CharacterZoom()
+    {
+        if (Input.GetMouseButton(1)) // Aiming
+        {
+            if (!ZoomState)
+            {
+                ZoomState = true;
+                ZoomInterpolate = 0f;
+            }
+            CharacterCamera.m_Lens.FieldOfView = Mathf.SmoothStep(70f, 50f, ZoomInterpolate);
+            ZoomInterpolate += 4f * Time.deltaTime;
+        }
+        else
+        {
+            if (ZoomState) // Not Aiming
+            {
+                ZoomState = false;
+                ZoomInterpolate = 0f;
+            }
+
+            CharacterCamera.m_Lens.FieldOfView = Mathf.SmoothStep(50f, 70f, ZoomInterpolate);
+            ZoomInterpolate += 3f * Time.deltaTime;
+            
         }
     }
 }

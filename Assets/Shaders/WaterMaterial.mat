@@ -109,8 +109,8 @@ Material:
     - _QueueControl: 0
     - _QueueOffset: 0
     - _ReceiveShadows: 1
-    - _Ripple_Desnsity: 453.06
-    - _Ripple_Space: 26.57
+    - _Ripple_Desnsity: 158.28
+    - _Ripple_Space: 10.7
     - _Smoothness: 0.5
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
@@ -123,7 +123,7 @@ Material:
     - scale: 1.49
     - sin_freq: 9.72
     m_Colors:
-    - Color_07d66dbf459a427290c7b0403283d67f: {r: 1, g: 1, b: 1, a: 0.78039217}
+    - Color_07d66dbf459a427290c7b0403283d67f: {r: 1, g: 1, b: 1, a: 0.50980395}
     - Deep: {r: 0.13385522, g: 0.35499978, b: 0.6037736, a: 0.9372549}
     - Shallow: {r: 0.47129744, g: 0.7763748, b: 0.8396226, a: 0.5176471}
     - Vector3_a51b31a925e44bd791d49ff6a2a52c60: {r: 0, g: 0, b: 0, a: 0}

@@ -2,14 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
-
+/* UNFINISHED GAME STATE SCRIPT */
 public enum GameState {
     Menu,
     Options,
     InGame
 };
 
-public enum RoundState {
+public enum RoundState { 
     WinRound,
     LoseRound,
     BossRound,

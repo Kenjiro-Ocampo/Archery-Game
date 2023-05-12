@@ -2,16 +2,25 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using TMPro;
 public class S_SheepAI : MonoBehaviour
 {
-    public Transform PlayerPosition;
+    [SerializeField] public float MaxHealth;
+    [SerializeField] public float Damage = 10;
+    [SerializeField] public TMP_Text HealthDisplay;
+    private Transform PlayerPosition;
     private GameObject Player;
+    private float CurrentHealth;
+    private Canvas SheepCanvas;
     [SerializeField] public NavMeshAgent SheepBrain;
 
     private void Awake() 
     {
+        CurrentHealth = MaxHealth;
+        
+        //GetComponentInChildren<Canvas>().worldCamera = Camera.main;
         SheepBrain = GetComponent<NavMeshAgent>();
-
+        this.gameObject.transform.GetChild(0).gameObject.GetComponent<Canvas>().worldCamera = Camera.main;
         Player = GameObject.FindWithTag("Player");
         PlayerPosition = Player.GetComponent<Transform>();
     }
@@ -24,6 +33,40 @@ public class S_SheepAI : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        SheepBrain.destination = PlayerPosition.position + new Vector3(0,0,0);
+        HealthDisplay.text = MaxHealth.ToString() + " / " + MaxHealth.ToString();
+        if(Player != null)
+        {
+            SheepBrain.destination = PlayerPosition.position + new Vector3(0,0,0);
+        }
+    }
+
+    void LateUpdate()
+    {
+        HealthDisplay.transform.LookAt(Camera.main.transform);
+        HealthDisplay.transform.rotation = Quaternion.LookRotation(Camera.main.transform.forward);
+    }
+
+    public void setHealth(float value)
+    {
+        CurrentHealth = value;
+    }
+
+    public float getCurrentHealth()
+    {
+        return this.CurrentHealth;
+    }
+
+    public float getMaxHealth()
+    {
+        return this.MaxHealth;
+    }
+
+    private void OnTriggerEnter(Collider other) {
+        if (!other.gameObject.CompareTag("Player"))
+        {
+            return;
+        }
+
+        other.gameObject.GetComponent<S_Character_Combat>().setHealth(Damage);
     }
 }
